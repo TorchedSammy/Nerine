@@ -54,6 +54,9 @@ func (cpu *CPU) Run() {
 
 			cpu.registers[reg] = int(val)
 			cpu.debugPrintReg(reg)
+		default:
+			fmt.Printf("Encountered unknown opcode: %02X\n", op.Val())
+			os.Exit(1)
 		}
 		cpu.ip++
 	}
