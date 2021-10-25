@@ -21,7 +21,7 @@ func NewCPU() *CPU {
 
 func (cpu *CPU) Load(data []byte) {
 	if len(data) >= 0xffff {
-		fmt.Println("Program larger than RAM")
+		fmt.Println("Program larger than RAM! Exiting.")
 		os.Exit(1)
 	}
 
@@ -29,36 +29,42 @@ func (cpu *CPU) Load(data []byte) {
 		cpu.ram[i] = data[i]
 	}
 }
+
 func (cpu *CPU) Run() {
 	cpu.state = 1 // Running
 	for cpu.state == 1 {
 		op := opcode.New(cpu.ram[cpu.ip])
-		fmt.Printf("ip: %04X // %02X %s\n", cpu.ip, op.Val(), op.String())
+		fmt.Printf("ip: %04X // running instr: %02X %s\n", cpu.ip, op.Val(), op.String())
 
 		switch int(op.Val()) {
 		case opcode.HALT:
 			cpu.state = 0
 		case opcode.ADD:
-			cpu.ip++
-			reg := cpu.ram[cpu.ip]
-			cpu.ip++
-			a := cpu.ram[cpu.ip]
-			cpu.ip++
-			b := cpu.ram[cpu.ip]
-
+			reg := cpu.atIP()
+			a := cpu.atIP()
+			b := cpu.atIP()
+			
 			av := cpu.registers[a]
 			bv := cpu.registers[b]
 			cpu.registers[reg] = av + bv
-			fmt.Printf("%d reg -> %d\n", reg, av + bv)
+			cpu.debugPrintReg(reg)
 		case opcode.MV:
-			cpu.ip++
-			reg := cpu.ram[cpu.ip]
-			cpu.ip++
-			val := cpu.ram[cpu.ip]
+			reg := cpu.atIP()
+			val := cpu.atIP()
 
 			cpu.registers[reg] = int(val)
-			fmt.Printf("%d reg -> %d\n", reg, val)
+			cpu.debugPrintReg(reg)
 		}
 		cpu.ip++
 	}
 }
+
+func (cpu *CPU) atIP() byte {
+	cpu.ip++
+	return cpu.ram[cpu.ip]
+}
+
+func (cpu *CPU) debugPrintReg(register byte) {
+	fmt.Printf("@%d register -> %d\n", register, cpu.registers[register])
+}
+
