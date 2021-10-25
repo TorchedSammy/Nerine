@@ -40,13 +40,29 @@ func (cpu *CPU) Run() {
 		case opcode.HALT:
 			cpu.state = 0
 		case opcode.ADD:
-			reg := cpu.atIP()
-			a := cpu.atIP()
-			b := cpu.atIP()
-			
+			reg, a, b := cpu.get3Val()
+	
 			av := cpu.registers[a]
 			bv := cpu.registers[b]
 			cpu.registers[reg] = av + bv
+			cpu.debugPrintReg(reg)
+		case opcode.SUB:
+			reg, a, b := cpu.get3Val()
+			av, bv := cpu.registers[a], cpu.registers[b]
+
+			cpu.registers[reg] = av + bv
+			cpu.debugPrintReg(reg)
+		case opcode.MUL:
+			reg, a, b := cpu.get3Val()
+			av, bv := cpu.registers[a], cpu.registers[b]
+
+			cpu.registers[reg] = av * bv
+			cpu.debugPrintReg(reg)
+		case opcode.DIV:
+			reg, a, b := cpu.get3Val()
+			av, bv := cpu.registers[a], cpu.registers[b]
+
+			cpu.registers[reg] = av / bv
 			cpu.debugPrintReg(reg)
 		case opcode.MV:
 			reg := cpu.atIP()
@@ -60,6 +76,14 @@ func (cpu *CPU) Run() {
 		}
 		cpu.ip++
 	}
+}
+
+func (cpu *CPU) get3Val() (byte, byte, byte) {
+	a := cpu.atIP()
+	b := cpu.atIP()
+	c := cpu.atIP()
+
+	return a, b, c
 }
 
 func (cpu *CPU) atIP() byte {
